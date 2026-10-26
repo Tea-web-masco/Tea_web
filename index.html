@@ -1,25 +1,121 @@
-<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tea Together</title><style>
-:root{font-family:system-ui,-apple-system,sans-serif;color:#f7eee3;background:#171b2b}*{box-sizing:border-box}body{margin:0;padding:18px}.wrap{max-width:850px;margin:auto}h1{text-align:center;font-size:29px}p{color:#c9c7d2}.panel{background:#242a3d;border:1px solid #43475b;border-radius:18px;padding:16px;margin:12px 0}button,input{font:inherit;border-radius:12px;padding:12px;border:0}button{background:#e9a75b;color:#1b1b25;font-weight:700;cursor:pointer}button:disabled{opacity:.45}input{background:#141827;color:white;border:1px solid #52586c;min-width:0} .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row input{flex:1} .hidden{display:none}.small{font-size:13px;color:#c9c7d2}.choices button{margin:4px}.choices button.active{outline:3px solid #f6e1a0}.scene{position:relative;height:235px;overflow:hidden;text-align:center;background:radial-gradient(ellipse at bottom,#514337,#25283a 70%);border-radius:16px}.teapot{font-size:95px;position:absolute;left:14%;top:12px;transform-origin:80% 70%}.cup{font-size:100px;position:absolute;right:18%;bottom:5px}.stream{position:absolute;left:50%;top:105px;height:0;width:9px;border-radius:12px;background:linear-gradient(#d2a05d,#b56c29);opacity:0}.pour .teapot{animation:tilt 3s ease-in-out}.pour .stream{animation:stream 3s ease-in-out}@keyframes tilt{0%,100%{transform:rotate(0)}30%,75%{transform:rotate(-35deg)}}@keyframes stream{0%,20%,90%,100%{height:0;opacity:0}35%,75%{height:90px;opacity:1}}.chat{height:200px;overflow:auto;background:#151a2a;padding:12px;border-radius:12px}.msg{padding:5px 0;overflow-wrap:anywhere}.status{font-size:14px;color:#b6efbd}.emoji button{padding:7px;background:#42475c;margin:2px;color:white} .notice{color:#ffcc93}
-</style></head><body><main class="wrap"><h1>🫖 Tea Together</h1><p style="text-align:center">Spotkajmy się na wspólny napój ☕</p><section class="panel" id="lobby"><label>Twój pseudonim</label><div class="row"><input id="nick" maxlength="24" placeholder="Np. Przyjaciel"><button id="create">Utwórz pokój</button></div><p class="small">Lub otwórz link do pokoju otrzymany od znajomego.</p></section><section id="room" class="hidden"><div class="panel"><div class="row"><strong id="roomname"></strong><span class="status" id="presence">Łączenie…</span></div><div class="row"><input id="share" readonly><button id="copy">Kopiuj link</button></div><p id="info" class="small"></p></div><div class="panel"><h3>Wybierz napój</h3><div class="choices" id="drinks"><button data-drink="tea">🍵 Herbata</button><button data-drink="coffee">☕ Kawa</button><button data-drink="beer">🍺 Piwo</button></div><p id="selection" class="small">Wybierz napój i poczekaj na drugą osobę.</p><div id="rps" class="hidden"><h3>Różne napoje! Papier, kamień, nożyce</h3><div class="choices"><button data-hand="rock">✊ Kamień</button><button data-hand="paper">✋ Papier</button><button data-hand="scissors">✌️ Nożyce</button></div><p class="small">Wybierz gest. Wynik pojawi się, gdy obie osoby zagrają.</p></div><div class="scene" id="scene"><div class="teapot" id="pot">🫖</div><div class="stream"></div><div class="cup" id="cup">🍵</div></div><p id="result" style="text-align:center"></p><button id="again">Nowa runda</button></div><div class="panel"><h3>💬 Czat</h3><div id="messages" class="chat" aria-live="polite"></div><div class="emoji"><button data-emoji="😀">😀</button><button data-emoji="😂">😂</button><button data-emoji="☕">☕</button><button data-emoji="🍻">🍻</button><button data-emoji="👍">👍</button><button data-emoji="👋">👋</button></div><form id="chatForm" class="row"><input id="message" maxlength="300" placeholder="Napisz wiadomość…"><button>Wyślij</button></form></div></section><p id="error" class="notice"></p></main>
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tea Together</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#f7eee3;background:#171b2b}*{box-sizing:border-box}body{margin:0;padding:18px}.wrap{max-width:850px;margin:auto}h1{text-align:center;font-size:30px}p{color:#c9c7d2}.panel{background:#242a3d;border:1px solid #43475b;border-radius:18px;padding:16px;margin:12px 0}button,input{font:inherit;border-radius:12px;padding:12px;border:0}button{background:#e9a75b;color:#1b1b25;font-weight:700;cursor:pointer}button:disabled{opacity:.45}input{background:#141827;color:white;border:1px solid #52586c;min-width:0}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row input{flex:1}.hidden{display:none!important}.small{font-size:14px;color:#c9c7d2}.choices button{margin:4px}.choices button.active{outline:3px solid #f6e1a0}.scene{position:relative;height:235px;overflow:hidden;text-align:center;background:radial-gradient(ellipse at bottom,#514337,#25283a 70%);border-radius:16px}.teapot{font-size:95px;position:absolute;left:14%;top:12px;transform-origin:80% 70%}.cup{font-size:100px;position:absolute;right:18%;bottom:5px}.stream{position:absolute;left:50%;top:105px;height:0;width:9px;border-radius:12px;background:linear-gradient(#d2a05d,#b56c29);opacity:0}.pour .teapot{animation:tilt 3s ease-in-out}.pour .stream{animation:stream 3s ease-in-out}@keyframes tilt{0%,100%{transform:rotate(0)}30%,75%{transform:rotate(-35deg)}}@keyframes stream{0%,20%,90%,100%{height:0;opacity:0}35%,75%{height:90px;opacity:1}}.chat{height:200px;overflow:auto;background:#151a2a;padding:12px;border-radius:12px}.msg{padding:5px 0;overflow-wrap:anywhere}.status{font-size:14px;color:#b6efbd}.emoji button{padding:7px;background:#42475c;margin:2px;color:white}.notice{color:#ffcc93}#result{font-size:18px;font-weight:700;text-align:center}
+
+/* Tea Together — czytelny układ na telefon i komputer */
+:root{color-scheme:dark}
+body{padding:18px 14px 40px;background:radial-gradient(circle at 50% -140px,#343049 0,#171b2b 430px)}
+.wrap{max-width:1060px}
+h1{font-size:clamp(29px,5vw,42px);letter-spacing:-.035em;margin:22px 0 5px}
+.tagline{text-align:center;margin:0 0 28px;color:#d6c8c0;font-size:15px}
+.panel{box-shadow:0 10px 28px #080b1830;padding:20px;margin:14px 0;border-radius:22px}
+.panel h3{margin:0 0 16px;font-size:19px;letter-spacing:-.02em}
+label{display:block;font-weight:700;margin-bottom:10px}
+button{min-height:47px;transition:transform .12s ease,background .15s ease}
+button:active{transform:scale(.98)}
+button:focus-visible,input:focus-visible{outline:3px solid #f5cb87;outline-offset:2px}
+#lobby{max-width:620px;margin:0 auto}
+#lobby .row{display:grid;grid-template-columns:minmax(0,1fr) auto}
+#lobby input{width:100%}
+.room-header{display:grid;gap:12px}
+.room-header>.row:first-child{justify-content:space-between}
+.room-header strong{font-size:19px}
+.status{background:#19382f;border-radius:30px;padding:8px 11px}
+.share-row{display:grid;grid-template-columns:minmax(0,1fr) auto}
+.share-row input{width:100%;font-size:13px}
+.room-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:0}
+.step{display:inline-grid;place-items:center;width:29px;height:29px;border-radius:50%;background:#e9a75b;color:#171b2b;font-size:15px;margin-right:6px}
+.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.choices button{margin:0;padding:12px 5px;min-height:60px;line-height:1.35}
+.choices button.active{background:#ffe0a9;outline:2px solid #f6e1a0}
+.selection-note{background:#32374b;border-left:3px solid #e9a75b;border-radius:8px;padding:12px 13px;min-height:48px;margin:16px 0}
+#rps{border:1px solid #696079;background:#292b43;border-radius:15px;padding:15px;margin:14px 0}
+#rps h3{font-size:17px}
+.scene{margin-top:18px;height:220px}
+.scene-label{position:absolute;top:12px;left:0;right:0;color:#d9d2c7;font-size:13px}
+.teapot{top:38px}.cup{bottom:12px}
+#result{line-height:1.5;min-height:26px}
+.next-round{display:block;width:100%;margin-top:12px}
+.chat-panel{display:flex;flex-direction:column}
+.chat-hint{font-weight:400;font-size:12px;color:#b7b9c9;float:right;padding-top:5px}
+.chat{flex:1;min-height:180px;height:240px}
+.msg{border-bottom:1px solid #ffffff10;padding:9px 2px;line-height:1.45}
+.msg strong{color:#f4c789}
+.emoji{display:flex;gap:3px;flex-wrap:wrap;margin:12px 0}
+.emoji button{flex:1;min-width:38px;font-size:19px}
+#chatForm{display:grid;grid-template-columns:minmax(0,1fr) auto}
+#chatForm input{width:100%}
+.notice{max-width:900px;margin:15px auto}
+@media(min-width:760px){
+.room-grid{grid-template-columns:minmax(0,1.25fr) minmax(300px,.85fr);gap:16px;align-items:stretch}
+.room-grid>.panel{margin:0}
+.chat{height:auto;min-height:360px}
+}
+@media(max-width:410px){
+body{padding:12px 10px 32px}
+.panel{padding:14px}
+#lobby .row{grid-template-columns:1fr}
+#lobby button{width:100%}
+.choices button{font-size:13px}
+.share-row{grid-template-columns:1fr}
+.share-row button{width:100%}
+.chat-hint{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+.pour .teapot,.pour .stream{animation:none}
+}
+</style></head><body><main class="wrap"><h1>🫖 Tea Together</h1><p class="tagline">Dwie osoby. Jeden wspólny napój. ☕</p>
+<section class="panel" id="lobby"><label for="nick">Twój pseudonim</label><div class="row"><input id="nick" maxlength="24" placeholder="Np. Masco"><button id="create">Utwórz pokój</button><button id="enter" class="hidden">Dołącz do pokoju</button></div><p id="lobbyInfo" class="small">Lub otwórz link do pokoju otrzymany od znajomego.</p></section>
+<section id="room" class="hidden"><div class="panel room-header"><div class="row"><strong id="roomname"></strong><span class="status" id="presence">Łączenie…</span></div><div class="row share-row"><input id="share" aria-label="Link do pokoju" readonly><button id="copy">Kopiuj link</button></div><p id="info" class="small"></p></div>
+<div class="room-grid"><div class="panel drink-panel"><h3><span class="step">1</span> Wybierz napój</h3><div class="choices" id="drinks"><button data-drink="tea">🍵 Herbata</button><button data-drink="coffee">☕ Kawa</button><button data-drink="beer">🍺 Piwo</button></div><p id="selection" class="small selection-note">Wybierz napój i poczekaj na drugą osobę.</p><div id="rps" class="hidden"><h3>✊ ✋ ✌️ Papier, kamień, nożyce</h3><p id="rpsInfo" class="small"></p><div class="choices"><button data-hand="rock">✊ Kamień</button><button data-hand="paper">✋ Papier</button><button data-hand="scissors">✌️ Nożyce</button></div></div><div class="scene" id="scene"><span class="scene-label">Wasz wspólny napój</span><div class="teapot" id="pot">🫖</div><div class="stream"></div><div class="cup" id="cup">🍵</div></div><p id="result"></p><button id="again" class="hidden next-round">Wybierz nowy napój 🔄</button></div>
+<div class="panel chat-panel"><h3>💬 Czat <span class="chat-hint">Rozmawiajcie na żywo</span></h3><div id="messages" class="chat" aria-live="polite"></div><div class="emoji"><button data-emoji="😀">😀</button><button data-emoji="😂">😂</button><button data-emoji="☕">☕</button><button data-emoji="🍻">🍻</button><button data-emoji="👍">👍</button><button data-emoji="👋">👋</button></div><form id="chatForm" class="row"><input id="message" maxlength="300" placeholder="Napisz wiadomość…"><button>Wyślij</button></form></div></div></section><p id="error" class="notice"></p></main>
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js';
-import {getAuth,signInAnonymously,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js';
+import {getAuth,signInAnonymously} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js';
 import {getDatabase,ref,set,get,push,onValue,onChildAdded,onDisconnect,serverTimestamp,runTransaction} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js';
 const config={apiKey:'AIzaSyCYZ3KbNiEzEpUC7A1_rL9ApmP2gejI2yU',authDomain:'tea-web-eabaf.firebaseapp.com',databaseURL:'https://tea-web-eabaf-default-rtdb.europe-west1.firebasedatabase.app',projectId:'tea-web-eabaf',storageBucket:'tea-web-eabaf.firebasestorage.app',messagingSenderId:'954780570280',appId:'1:954780570280:web:daad3c0162bc5bd490a89d'};
-const app=initializeApp(config),auth=getAuth(app),db=getDatabase(app),$=id=>document.getElementById(id);let uid,roomId,players={},round=1,shown='',joined=false;
-const drinks={tea:'🍵',coffee:'☕',beer:'🍺'},labels={tea:'herbata',coffee:'kawa',beer:'piwo'};
+const app=initializeApp(config),auth=getAuth(app),db=getDatabase(app),$=id=>document.getElementById(id);
+let uid='',roomId='',players={},seats={},choices={},hands={},round=1,attempt=1,joined=false,animationKey='',animationTimer=null;
+const drinks={tea:'🍵',coffee:'☕',beer:'🍺'},labels={tea:'herbatę',coffee:'kawę',beer:'piwo'};
 const roomRef=path=>ref(db,`rooms/${roomId}/${path}`);
 function error(e){$('error').textContent='Błąd: '+(e?.message||e)}
 function randomId(){return Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>b.toString(16).padStart(2,'0')).join('')}
-async function join(id){if(joined)return;roomId=id;const base=ref(db,`rooms/${id}`);const snapshot=await get(base);if(!snapshot.exists()){await set(ref(db,`rooms/${id}/meta`),{createdBy:uid,createdAt:serverTimestamp()})}const seats=ref(db,`rooms/${id}/seats`);const tx=await runTransaction(seats,current=>{current=current||{};if(current.a===uid||current.b===uid)return current;if(!current.a){current.a=uid;return current}if(!current.b){current.b=uid;return current}return;});if(!tx.committed)throw Error('Pokój jest pełny (maksymalnie 2 osoby).');joined=true;const mine=tx.snapshot.val().a===uid?'a':'b';const nick=($('nick').value.trim()||'Gość').slice(0,24);await set(roomRef(`players/${uid}`),{nick,online:true});await onDisconnect(roomRef(`players/${uid}/online`)).set(false);$('lobby').classList.add('hidden');$('room').classList.remove('hidden');$('roomname').textContent='Pokój '+id.slice(0,6);$('share').value=location.href.split('#')[0]+'#'+id;onValue(roomRef('players'),s=>{players=s.val()||{};const online=Object.values(players).filter(p=>p.online).length;$('presence').textContent=online===2?'🟢 Jesteście razem':'🟡 Czekamy na drugą osobę';update()});onValue(roomRef('round'),s=>{round=s.val()||1;shown='';$('scene').classList.remove('pour');update()});onValue(roomRef('choices'),s=>{window.choices=s.val()||{};update()});onValue(roomRef('hands'),s=>{window.hands=s.val()||{};update()});onChildAdded(roomRef('messages'),s=>{const m=s.val();if(!m||typeof m.text!=='string')return;const el=document.createElement('div');el.className='msg';const b=document.createElement('strong');b.textContent=(m.nick||'Gość')+': ';el.append(b,document.createTextNode(m.text));$('messages').append(el);$('messages').scrollTop=$('messages').scrollHeight});}
-function update(){if(!joined)return;const seats=Object.keys(players),active=seats.filter(id=>players[id]?.online);const c=window.choices?.[round]||{},h=window.hands?.[round]||{};document.querySelectorAll('[data-drink]').forEach(b=>b.classList.toggle('active',c[uid]===b.dataset.drink));$('rps').classList.add('hidden');$('selection').textContent='Wybierz napój i poczekaj na drugą osobę.';if(active.length<2)return;const [a,b]=active;if(!c[a]||!c[b]){$('selection').textContent='Czekamy na wybór obu osób…';return}if(c[a]===c[b]){finish(c[a],'Oboje wybraliście ten sam napój!');return}$('rps').classList.remove('hidden');$('selection').textContent='Macie różne napoje. Zagrajcie w papier, kamień, nożyce!';if(!h[a]||!h[b])return;if(h[a]===h[b]){$('result').textContent='Remis! Wybierzcie gest ponownie.';return}const beats={rock:'scissors',paper:'rock',scissors:'paper'},winner=beats[h[a]]===h[b]?a:b;finish(c[winner],`Wygrywa ${players[winner].nick}!`)}
-function finish(drink,message){$('rps').classList.add('hidden');$('result').textContent=message+' Nalewamy: '+labels[drink];if(shown===round+drink)return;shown=round+drink;$('cup').textContent=drinks[drink];$('pot').textContent=drink==='beer'?'🍺':drink==='coffee'?'☕':'🫖';$('scene').classList.remove('pour');void $('scene').offsetWidth;$('scene').classList.add('pour')}
-$('create').onclick=async()=>{try{if(!uid)throw Error('Poczekaj na logowanie…');const id=randomId();history.replaceState(null,'','#'+id);await join(id)}catch(e){error(e)}};
+function myNick(){return ($('nick').value.trim()||'Gość').slice(0,24)}
+function otherId(){return seats.a===uid?seats.b:seats.a}
+function name(id){return players[id]?.nick||'Druga osoba'}
+function render(){if(!joined)return;const other=otherId(),online=Boolean(other&&players[other]?.online),c=choices[round]||{},h=(hands[round]||{})[attempt]||{},my=c[uid],theirs=c[other];
+$('presence').textContent=online?'🟢 Jesteście razem':'🟡 Czekamy na drugą osobę';$('info').textContent=online?`W pokoju: ${name(uid)} i ${name(other)}`:`Jesteś jako ${name(uid)}. Wyślij link znajomemu.`;
+document.querySelectorAll('[data-drink]').forEach(b=>{b.classList.toggle('active',my===b.dataset.drink);b.disabled=!!my});document.querySelectorAll('[data-hand]').forEach(b=>b.disabled=!!h[uid]);
+$('rps').classList.add('hidden');$('selection').textContent='Wybierz napój i poczekaj na drugą osobę.';
+if(!online){$('again').classList.add('hidden');$('result').textContent='';$('selection').textContent=my?'Twój napój został wybrany. Czekamy na drugą osobę.':'Zaproś drugą osobę i wybierz napój.';return}
+if(!my&&!theirs){$('again').classList.add('hidden');$('result').textContent='';$('selection').textContent='Oboje możecie wybrać napój.';return}
+if(!my){$('again').classList.add('hidden');$('result').textContent='';$('selection').textContent=`${name(other)} wybrał(a) już napój i czeka na Twój wybór.`;return}
+if(!theirs){$('again').classList.add('hidden');$('result').textContent='';$('selection').textContent=`Wybrałeś(-aś) napój. Czekamy na wybór osoby ${name(other)}.`;return}
+if(my===theirs){finish(my,'Oboje wybraliście ten sam napój!');return}
+$('selection').textContent='Wybraliście różne napoje. Zagrajcie o to, co będzie nalewane!';$('rps').classList.remove('hidden');
+if(!h[uid]&&!h[other]){$('rpsInfo').textContent='Wybierz swój gest.';return}
+if(!h[uid]){$('rpsInfo').textContent=`${name(other)} wybrał(a) gest. Czeka na Ciebie!`;return}
+if(!h[other]){$('rpsInfo').textContent=`Twój gest zapisany. Czekamy na ${name(other)}.`;return}
+if(h[uid]===h[other]){$('rpsInfo').textContent='Remis! Rozgrywamy ponownie…';if(seats.a===uid)runTransaction(roomRef('attempt'),n=>n===attempt?n+1:undefined).catch(error);return}
+const beats={rock:'scissors',paper:'rock',scissors:'paper'},winner=beats[h[uid]]===h[other]?uid:other;
+finish(c[winner],winner===uid?`🏆 Wygrywasz! ${name(other)} pije Twój napój.`:`🏆 Wygrywa ${name(other)}! Dzisiaj pijecie wybrany przez tę osobę napój.`)
+}
+function finish(drink,message){$('rps').classList.add('hidden');$('selection').textContent='Wynik rundy:';const key=round+':'+drink;$('result').textContent=message+` Nalewamy ${labels[drink]}!`;
+if(animationKey===key)return;animationKey=key;clearTimeout(animationTimer);$('cup').textContent=drinks[drink];$('pot').textContent=drink==='beer'?'🍺':drink==='coffee'?'☕':'🫖';$('scene').classList.remove('pour');void $('scene').offsetWidth;$('scene').classList.add('pour');
+animationTimer=setTimeout(()=>{if(animationKey!==key)return;$('scene').classList.remove('pour');$('result').textContent=message+' 🥂 Na zdrowie!';$('again').classList.remove('hidden')},3200)}
+async function join(id,create=false){if(joined)return;if(!uid)throw Error('Trwa logowanie. Spróbuj ponownie.');roomId=id;const base=ref(db,`rooms/${id}`);const snapshot=await get(base);if(!snapshot.exists()){if(!create)throw Error('Nie znaleziono pokoju. Poproś o nowy link.');await set(roomRef('meta'),{createdBy:uid,createdAt:serverTimestamp()})}
+const tx=await runTransaction(roomRef('seats'),current=>{current=current||{};if(current.a===uid||current.b===uid)return current;if(!current.a){current.a=uid;return current}if(!current.b){current.b=uid;return current}return});if(!tx.committed)throw Error('Pokój pełny (maksymalnie 2 osoby). Utwórz nowy pokój.');seats=tx.snapshot.val();
+const nick=myNick();localStorage.setItem('teaNick',nick);await set(roomRef(`players/${uid}`),{nick,online:true});await onDisconnect(roomRef(`players/${uid}/online`)).set(false);joined=true;history.replaceState(null,'','#'+id);$('lobby').classList.add('hidden');$('room').classList.remove('hidden');$('roomname').textContent='Pokój '+id.slice(0,6);$('share').value=location.href;
+onValue(roomRef('seats'),s=>{seats=s.val()||{};render()});onValue(roomRef('players'),s=>{players=s.val()||{};render()});onValue(roomRef('round'),s=>{const next=s.val()||1;if(next!==round){round=next;animationKey='';clearTimeout(animationTimer);$('scene').classList.remove('pour');$('again').classList.add('hidden')}render()});onValue(roomRef('attempt'),s=>{attempt=s.val()||1;render()});onValue(roomRef('choices'),s=>{choices=s.val()||{};render()});onValue(roomRef('hands'),s=>{hands=s.val()||{};render()});onChildAdded(roomRef('messages'),s=>{const m=s.val();if(!m||typeof m.text!=='string')return;const el=document.createElement('div');el.className='msg';const b=document.createElement('strong');b.textContent=(m.nick||'Gość')+': ';el.append(b,document.createTextNode(m.text));$('messages').append(el);$('messages').scrollTop=$('messages').scrollHeight});render()}
+$('nick').value=localStorage.getItem('teaNick')||'';
+$('create').onclick=async()=>{try{$('error').textContent='';await join(randomId(),true)}catch(e){error(e)}};
+$('enter').onclick=async()=>{try{$('error').textContent='';await join(location.hash.slice(1),false)}catch(e){error(e)}};
 $('copy').onclick=async()=>{try{await navigator.clipboard.writeText($('share').value);$('copy').textContent='Skopiowano!'}catch(e){$('share').select();error('Zaznacz link i skopiuj ręcznie.')}};
 document.querySelectorAll('[data-drink]').forEach(b=>b.onclick=async()=>{try{await set(roomRef(`choices/${round}/${uid}`),b.dataset.drink)}catch(e){error(e)}});
-document.querySelectorAll('[data-hand]').forEach(b=>b.onclick=async()=>{try{await set(roomRef(`hands/${round}/${uid}`),b.dataset.hand)}catch(e){error(e)}});
-$('again').onclick=async()=>{try{await runTransaction(roomRef('round'),n=>(n||1)+1);$('result').textContent=''}catch(e){error(e)}};
+document.querySelectorAll('[data-hand]').forEach(b=>b.onclick=async()=>{try{await set(roomRef(`hands/${round}/${attempt}/${uid}`),b.dataset.hand)}catch(e){error(e)}});
+$('again').onclick=async()=>{try{await runTransaction(roomRef('round'),n=>(n||1)+1);await set(roomRef('attempt'),1)}catch(e){error(e)}};
 document.querySelectorAll('[data-emoji]').forEach(b=>b.onclick=()=>{$('message').value+=b.dataset.emoji;$('message').focus()});
-$('chatForm').onsubmit=async e=>{e.preventDefault();const msg=$('message').value.trim();if(!msg)return;try{await push(roomRef('messages'),{uid,nick:players[uid]?.nick||'Gość',text:msg.slice(0,300),time:serverTimestamp()});$('message').value=''}catch(err){error(err)}};
-try{await signInAnonymously(auth);uid=auth.currentUser.uid;if(location.hash.slice(1))await join(location.hash.slice(1))}catch(e){error(e)}
+$('chatForm').onsubmit=async e=>{e.preventDefault();const msg=$('message').value.trim();if(!msg)return;try{await push(roomRef('messages'),{uid,nick:name(uid),text:msg.slice(0,300),time:serverTimestamp()});$('message').value=''}catch(err){error(err)}};
+try{await signInAnonymously(auth);uid=auth.currentUser.uid;if(location.hash.slice(1)){$('create').classList.add('hidden');$('enter').classList.remove('hidden');$('lobbyInfo').textContent='Otrzymałeś(-aś) zaproszenie. Wpisz pseudonim i kliknij „Dołącz do pokoju”.'}}catch(e){error(e)}
 </script></body></html>

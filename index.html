@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tea Together</title>
+<style>
+body {
+  margin: 0;
+  background: #171b2b;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 70px 15px;
+}
+h1 { font-size: 32px; }
+.cup {
+  font-size: 110px;
+  margin: 60px auto;
+  animation: tea 2s ease-in-out infinite;
+}
+@keyframes tea {
+  0%,100% { transform: rotate(-8deg); }
+  50% { transform: rotate(8deg); }
+}
+button {
+  background: #e9a75b;
+  padding: 16px 30px;
+  border: 0;
+  border-radius: 30px;
+  font-size: 18px;
+}
+</style>
+</head>
+<body>
+<h1>☕ Tea Together</h1>
+<p>Let's have a tea together!</p>
+<div class="cup">🍵</div>
+<button onclick="alert('Cheers! ☕')">
+Drink together
+</button>
+</body>
+</html>

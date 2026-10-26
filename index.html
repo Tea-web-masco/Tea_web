@@ -1,43 +1,25 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tea Together</title>
-<style>
-body {
-  margin: 0;
-  background: #171b2b;
-  color: white;
-  font-family: Arial, sans-serif;
-  text-align: center;
-  padding: 70px 15px;
-}
-h1 { font-size: 32px; }
-.cup {
-  font-size: 110px;
-  margin: 60px auto;
-  animation: tea 2s ease-in-out infinite;
-}
-@keyframes tea {
-  0%,100% { transform: rotate(-8deg); }
-  50% { transform: rotate(8deg); }
-}
-button {
-  background: #e9a75b;
-  padding: 16px 30px;
-  border: 0;
-  border-radius: 30px;
-  font-size: 18px;
-}
-</style>
-</head>
-<body>
-<h1>☕ Tea Together</h1>
-<p>Let's have a tea together!</p>
-<div class="cup">🍵</div>
-<button onclick="alert('Cheers! ☕')">
-Drink together
-</button>
-</body>
-</html>
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tea Together</title><style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#f7eee3;background:#171b2b}*{box-sizing:border-box}body{margin:0;padding:18px}.wrap{max-width:850px;margin:auto}h1{text-align:center;font-size:29px}p{color:#c9c7d2}.panel{background:#242a3d;border:1px solid #43475b;border-radius:18px;padding:16px;margin:12px 0}button,input{font:inherit;border-radius:12px;padding:12px;border:0}button{background:#e9a75b;color:#1b1b25;font-weight:700;cursor:pointer}button:disabled{opacity:.45}input{background:#141827;color:white;border:1px solid #52586c;min-width:0} .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row input{flex:1} .hidden{display:none}.small{font-size:13px;color:#c9c7d2}.choices button{margin:4px}.choices button.active{outline:3px solid #f6e1a0}.scene{position:relative;height:235px;overflow:hidden;text-align:center;background:radial-gradient(ellipse at bottom,#514337,#25283a 70%);border-radius:16px}.teapot{font-size:95px;position:absolute;left:14%;top:12px;transform-origin:80% 70%}.cup{font-size:100px;position:absolute;right:18%;bottom:5px}.stream{position:absolute;left:50%;top:105px;height:0;width:9px;border-radius:12px;background:linear-gradient(#d2a05d,#b56c29);opacity:0}.pour .teapot{animation:tilt 3s ease-in-out}.pour .stream{animation:stream 3s ease-in-out}@keyframes tilt{0%,100%{transform:rotate(0)}30%,75%{transform:rotate(-35deg)}}@keyframes stream{0%,20%,90%,100%{height:0;opacity:0}35%,75%{height:90px;opacity:1}}.chat{height:200px;overflow:auto;background:#151a2a;padding:12px;border-radius:12px}.msg{padding:5px 0;overflow-wrap:anywhere}.status{font-size:14px;color:#b6efbd}.emoji button{padding:7px;background:#42475c;margin:2px;color:white} .notice{color:#ffcc93}
+</style></head><body><main class="wrap"><h1>🫖 Tea Together</h1><p style="text-align:center">Spotkajmy się na wspólny napój ☕</p><section class="panel" id="lobby"><label>Twój pseudonim</label><div class="row"><input id="nick" maxlength="24" placeholder="Np. Przyjaciel"><button id="create">Utwórz pokój</button></div><p class="small">Lub otwórz link do pokoju otrzymany od znajomego.</p></section><section id="room" class="hidden"><div class="panel"><div class="row"><strong id="roomname"></strong><span class="status" id="presence">Łączenie…</span></div><div class="row"><input id="share" readonly><button id="copy">Kopiuj link</button></div><p id="info" class="small"></p></div><div class="panel"><h3>Wybierz napój</h3><div class="choices" id="drinks"><button data-drink="tea">🍵 Herbata</button><button data-drink="coffee">☕ Kawa</button><button data-drink="beer">🍺 Piwo</button></div><p id="selection" class="small">Wybierz napój i poczekaj na drugą osobę.</p><div id="rps" class="hidden"><h3>Różne napoje! Papier, kamień, nożyce</h3><div class="choices"><button data-hand="rock">✊ Kamień</button><button data-hand="paper">✋ Papier</button><button data-hand="scissors">✌️ Nożyce</button></div><p class="small">Wybierz gest. Wynik pojawi się, gdy obie osoby zagrają.</p></div><div class="scene" id="scene"><div class="teapot" id="pot">🫖</div><div class="stream"></div><div class="cup" id="cup">🍵</div></div><p id="result" style="text-align:center"></p><button id="again">Nowa runda</button></div><div class="panel"><h3>💬 Czat</h3><div id="messages" class="chat" aria-live="polite"></div><div class="emoji"><button data-emoji="😀">😀</button><button data-emoji="😂">😂</button><button data-emoji="☕">☕</button><button data-emoji="🍻">🍻</button><button data-emoji="👍">👍</button><button data-emoji="👋">👋</button></div><form id="chatForm" class="row"><input id="message" maxlength="300" placeholder="Napisz wiadomość…"><button>Wyślij</button></form></div></section><p id="error" class="notice"></p></main>
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js';
+import {getAuth,signInAnonymously,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js';
+import {getDatabase,ref,set,get,push,onValue,onChildAdded,onDisconnect,serverTimestamp,runTransaction} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js';
+const config={apiKey:'AIzaSyCYZ3KbNiEzEpUC7A1_rL9ApmP2gejI2yU',authDomain:'tea-web-eabaf.firebaseapp.com',databaseURL:'https://tea-web-eabaf-default-rtdb.europe-west1.firebasedatabase.app',projectId:'tea-web-eabaf',storageBucket:'tea-web-eabaf.firebasestorage.app',messagingSenderId:'954780570280',appId:'1:954780570280:web:daad3c0162bc5bd490a89d'};
+const app=initializeApp(config),auth=getAuth(app),db=getDatabase(app),$=id=>document.getElementById(id);let uid,roomId,players={},round=1,shown='',joined=false;
+const drinks={tea:'🍵',coffee:'☕',beer:'🍺'},labels={tea:'herbata',coffee:'kawa',beer:'piwo'};
+const roomRef=path=>ref(db,`rooms/${roomId}/${path}`);
+function error(e){$('error').textContent='Błąd: '+(e?.message||e)}
+function randomId(){return Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>b.toString(16).padStart(2,'0')).join('')}
+async function join(id){if(joined)return;roomId=id;const base=ref(db,`rooms/${id}`);const snapshot=await get(base);if(!snapshot.exists()){if(location.hash)throw Error('Nie znaleziono pokoju. Poproś o nowy link.');await set(ref(db,`rooms/${id}/meta`),{createdBy:uid,createdAt:serverTimestamp()})}const seats=ref(db,`rooms/${id}/seats`);const tx=await runTransaction(seats,current=>{current=current||{};if(current.a===uid||current.b===uid)return current;if(!current.a){current.a=uid;return current}if(!current.b){current.b=uid;return current}return;});if(!tx.committed)throw Error('Pokój jest pełny (maksymalnie 2 osoby).');joined=true;const mine=tx.snapshot.val().a===uid?'a':'b';const nick=($('nick').value.trim()||'Gość').slice(0,24);await set(roomRef(`players/${uid}`),{nick,online:true});await onDisconnect(roomRef(`players/${uid}/online`)).set(false);$('lobby').classList.add('hidden');$('room').classList.remove('hidden');$('roomname').textContent='Pokój '+id.slice(0,6);$('share').value=location.href.split('#')[0]+'#'+id;onValue(roomRef('players'),s=>{players=s.val()||{};const online=Object.values(players).filter(p=>p.online).length;$('presence').textContent=online===2?'🟢 Jesteście razem':'🟡 Czekamy na drugą osobę';update()});onValue(roomRef('round'),s=>{round=s.val()||1;shown='';$('scene').classList.remove('pour');update()});onValue(roomRef('choices'),s=>{window.choices=s.val()||{};update()});onValue(roomRef('hands'),s=>{window.hands=s.val()||{};update()});onChildAdded(roomRef('messages'),s=>{const m=s.val();if(!m||typeof m.text!=='string')return;const el=document.createElement('div');el.className='msg';const b=document.createElement('strong');b.textContent=(m.nick||'Gość')+': ';el.append(b,document.createTextNode(m.text));$('messages').append(el);$('messages').scrollTop=$('messages').scrollHeight});}
+function update(){if(!joined)return;const seats=Object.keys(players),active=seats.filter(id=>players[id]?.online);const c=window.choices?.[round]||{},h=window.hands?.[round]||{};document.querySelectorAll('[data-drink]').forEach(b=>b.classList.toggle('active',c[uid]===b.dataset.drink));$('rps').classList.add('hidden');$('selection').textContent='Wybierz napój i poczekaj na drugą osobę.';if(active.length<2)return;const [a,b]=active;if(!c[a]||!c[b]){$('selection').textContent='Czekamy na wybór obu osób…';return}if(c[a]===c[b]){finish(c[a],'Oboje wybraliście ten sam napój!');return}$('rps').classList.remove('hidden');$('selection').textContent='Macie różne napoje. Zagrajcie w papier, kamień, nożyce!';if(!h[a]||!h[b])return;if(h[a]===h[b]){$('result').textContent='Remis! Wybierzcie gest ponownie.';return}const beats={rock:'scissors',paper:'rock',scissors:'paper'},winner=beats[h[a]]===h[b]?a:b;finish(c[winner],`Wygrywa ${players[winner].nick}!`)}
+function finish(drink,message){$('rps').classList.add('hidden');$('result').textContent=message+' Nalewamy: '+labels[drink];if(shown===round+drink)return;shown=round+drink;$('cup').textContent=drinks[drink];$('pot').textContent=drink==='beer'?'🍺':drink==='coffee'?'☕':'🫖';$('scene').classList.remove('pour');void $('scene').offsetWidth;$('scene').classList.add('pour')}
+$('create').onclick=async()=>{try{if(!uid)throw Error('Poczekaj na logowanie…');const id=randomId();history.replaceState(null,'','#'+id);await join(id)}catch(e){error(e)}};
+$('copy').onclick=async()=>{try{await navigator.clipboard.writeText($('share').value);$('copy').textContent='Skopiowano!'}catch(e){$('share').select();error('Zaznacz link i skopiuj ręcznie.')}};
+document.querySelectorAll('[data-drink]').forEach(b=>b.onclick=async()=>{try{await set(roomRef(`choices/${round}/${uid}`),b.dataset.drink)}catch(e){error(e)}});
+document.querySelectorAll('[data-hand]').forEach(b=>b.onclick=async()=>{try{await set(roomRef(`hands/${round}/${uid}`),b.dataset.hand)}catch(e){error(e)}});
+$('again').onclick=async()=>{try{await runTransaction(roomRef('round'),n=>(n||1)+1);$('result').textContent=''}catch(e){error(e)}};
+document.querySelectorAll('[data-emoji]').forEach(b=>b.onclick=()=>{$('message').value+=b.dataset.emoji;$('message').focus()});
+$('chatForm').onsubmit=async e=>{e.preventDefault();const msg=$('message').value.trim();if(!msg)return;try{await push(roomRef('messages'),{uid,nick:players[uid]?.nick||'Gość',text:msg.slice(0,300),time:serverTimestamp()});$('message').value=''}catch(err){error(err)}};
+try{await signInAnonymously(auth);uid=auth.currentUser.uid;if(location.hash.slice(1))await join(location.hash.slice(1))}catch(e){error(e)}
+</script></body></html>
